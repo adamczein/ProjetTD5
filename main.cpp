@@ -8,6 +8,9 @@
 #include <functional>
 #include "cppitertools/range.hpp"
 #include "bibliotheque_cours.hpp"
+#include <map>
+
+
 using namespace std;
 using namespace iter;
 
@@ -130,29 +133,116 @@ int main()
 	#endif
 	//}
 
-	//TODO: Transférez les héros du vecteur heros dans une ListeLiee.
+	//TODO: Transférez les héros du vecteur heros dans une ListeLiee
+	ListeLiee<Heros> listeHeros;
+	for (const auto& heros1 : heros)
+	{
+		listeHeros.push_back(heros1);
+	}
+
+	cout << "La taille de la liste de héros est de " << listeHeros.size() << "." << endl;
 
 	//TODO: Créez un itérateur sur la liste liée à la position du héros Alucard
 	// Servez-vous de la fonction trouverParNom définie plus haut
 
+	Iterateur<Heros> iterateurAlucard = trouverParNom(listeHeros, "Alucard");
+
 	//TODO: Servez-vous de l'itérateur créé précédemment pour trouver l'héroine Aya Brea,
 	// en sachant qu'elle se trouve plus loin dans la liste.
+
+	Iterateur<Heros> iterateurAyaBrea;
+
+	for (Iterateur<Heros> it = iterateurAlucard; it != listeHeros.end(); it.avancer())
+	{
+		if ((*it).getNom() == "Aya Brea")
+		{
+			iterateurAyaBrea = it;
+			cout << "Aya Brea trouvée\n";
+		}
+	}
 
 	//TODO: Ajouter un hero bidon à la liste avant Aya Brea en vous servant de l'itérateur.
 	//TODO: Assurez-vous que la taille de la liste est correcte après l'ajout.
 
+	Heros herosBidon("Héros bidon", "Jeu", "Ennemi");
+	listeHeros.insert(iterateurAyaBrea, herosBidon);
+
+	cout << "La taille de la liste de héros est maintenant de " << listeHeros.size() << " à cause de l'ajout du héros bidon." << endl;
+
 	//TODO: Reculez votre itérateur jusqu'au héros Mario et effacez-le en utilisant l'itérateur, puis affichez le héros suivant dans la liste (devrait êter "Naked Snake/John").
 	//TODO: Assurez-vous que la taille de la liste est correcte après le retrait.
 
+	for (Iterateur<Heros> it = iterateurAyaBrea; it != listeHeros.begin(); it.reculer())
+	{
+		if ((*it).getNom() == "Mario")
+		{
+			cout << "Mario trouvé\n";
+			it = listeHeros.erase(it);
+			(*it).afficher(cout);
+		}
+	}
+
+	cout << "La taille de la liste de héros est " << listeHeros.size() << " à cause du retrait du héros Mario." << endl;
+	
 	//TODO: Effacez le premier élément de la liste.
+
+	Iterateur<Heros> premierElement = listeHeros.begin();
+	listeHeros.erase(premierElement);
+	
 
 	//TODO: Affichez votre liste de héros en utilisant un itérateur. La liste débute
 	// avec le héros Randi et n'a pas Mario.
 	// Servez-vous des methodes begin et end de la liste...
 
+	cout << separateurSections;
+	cout << "Heros: \n";
+
+	Iterateur<Heros> finListe = listeHeros.end();
+	for (Iterateur<Heros> it = listeHeros.begin(); it != finListe; it.avancer())
+	{
+		(*it).afficher(cout);
+	}
+
+	cout << separateurSections;
+
 	//TODO: Refaite le même affichage mais en utilisant une simple boucle "for" sur intervalle.
+
+	cout << "Heros: \n";
+
+	for (Heros& heros2 : listeHeros)
+	{
+		heros2.afficher(cout);
+	}
+
+	cout << separateurSections;
 	
 	//TODO: Utilisez un conteneur pour avoir les héros en ordre alphabétique (voir point 2 de l'énoncé).
+	
+	map<string, Heros> herosOrdonnes;
+	for (Heros& heros2 : listeHeros)
+	{
+		herosOrdonnes.map::insert({ heros2.getNom(), heros2 });
+	}
+
+	Heros randi = herosOrdonnes["Randi"];
+	randi.afficher(cout);
+
+	cout << separateurSections;
 
 	//TODO: Assurez-vous de n'avoir aucune ligne non couverte dans les classes pour la liste liée.  Il peut y avoir des lignes non couvertes dans les personnages...
 }
+
+//Question 2.2
+
+//La complexité de la recherche dans un map est en moyenne O(log(n)), où n est la taille de la map. Cela est dû au fait que 
+//les éléments dans la map sont triés par orddre alphabétique de leur clé, ce qui permet de divier la recherche par moitié à
+//chaque étape en comparant les clés. Ainsi, le nombre d'opérations élémentaires nécessaires pour trouver un élément est logarithmique
+//par rapport à la taille de la map.
+
+//Question 2.3
+
+//La recherche dans la liste liée se fait en O(n), où n est la taille de la liste.Cela est dû au parcours séquentiel des 
+//éléments pour trouver celui correspondant à la clé recherchée.En revanche, la recherche dans map s'effectue en O(log(n)), grâce
+//à sa structure d'arbre binaire de recherche équilibré. Ainsi, pour de grands ensembles de données, map offre des recherches plus
+//rapides en moyenne. Cependant, dans certains cas spécifiques, comme lorsqu'on recherche un élément proche de la position courante de
+//l'itérateur dans la liste liée, celle - ci peut être plus rapide.

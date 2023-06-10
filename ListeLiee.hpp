@@ -6,20 +6,30 @@ template<typename T>
 class ListeLiee
 {
 public:
+
 	//TODO: La construction par défaut doit créer une liste vide valide.
+	ListeLiee() : tete_(nullptr), queue_(nullptr), taille_(0) {}
 	~ListeLiee()
 	{
 		//TODO: Enlever la tête à répétition jusqu'à ce qu'il ne reste aucun élément.
 		// Pour enlever la tête, 
 		// 1. La tête doit devenir le suivant de la tête actuelle.
 		// 2. Ne pas oublier de désallouer le noeud de l'ancienne tête (si pas fait automatiquement).
+
+		while (tete_ != queue_)
+		{
+			tete_ = tete_->prochaineDonnee_;
+			delete tete_->precedenteDonnee_;
+		}
+
+		delete tete_;
 	}
 
 	bool estVide() const  { return taille_ == 0; }
 	unsigned size() const { return taille_; }
 	//NOTE: to_address permet que ce même code fonctionne que vous utilisiez des pointeurs bruts ou intelligents (ça prend le pointeur brut associé au pointeur intelligent, s'il est intelligent).
 	Iterateur<T> begin()  { return {to_address(tete_)}; }
-	Iterateur<T> end()    { return {to_address(queue_->suivant_)}; }
+	Iterateur<T> end()    { return {to_address(queue_->prochaineDonnee_)}; }
 
 	// Ajoute à la fin de la liste.
 	void push_back(const T& item)
@@ -27,6 +37,25 @@ public:
 		//TODO: Vous devez créer un nouveau noeud en mémoire.
 		//TODO: Si la liste était vide, ce nouveau noeud est la tête et la queue;
 		// autrement, ajustez la queue et pointeur(s) adjacent(s) en conséquence.
+
+		Noeud<T>* nouveauNoeud = new Noeud<T>(item);
+
+		if (estVide())
+		{
+			tete_ = nouveauNoeud;
+			
+		}
+			
+		
+		else
+		{
+			Noeud<T>* ancienneQueue = queue_;
+			ancienneQueue->prochaineDonnee_ = nouveauNoeud;
+			nouveauNoeud->precedenteDonnee_ = ancienneQueue;
+		}
+		
+		queue_ = nouveauNoeud;
+		taille_++;
 	}
 
 	// Insère avant la position de l'itérateur.
@@ -39,6 +68,7 @@ public:
 		// l'itérateur vers l'élément ajouté.
 		// Autrement, procédez comme suit
 		// 1. Créez un nouveau noeud initialisé avec item.
+		
 		// 2. Modifiez les attributs suivant_ et precedent_ du nouveau noeud
 		//    afin que le nouveau noeud soit lié au noeud précédent et suivant
 		//    à l'endroit où il est inséré selon notre itérateur.
@@ -48,6 +78,30 @@ public:
 		//    (précédent de l'itérateur) afin qu'il point vers le noeud créé.
 		// 5. Incrémentez la taille de la liste.
 		// 6. Retournez un nouvel itérateur initialisé au nouveau noeud.
+
+		if (it == end())
+		{
+			push_back(item);
+			return Iterateur<T>(queue_);
+		}
+
+		else
+		{
+			Noeud<T>* nouveauNoeud = new Noeud(item);
+			Noeud<T>* prochainNoeud = it.position_;
+			Noeud<T>* precedentNoeud = prochainNoeud->precedenteDonnee_;
+
+			nouveauNoeud->prochaineDonnee_ = prochainNoeud;
+			nouveauNoeud->precedenteDonnee_ = precedentNoeud;
+			prochainNoeud->precedenteDonnee_ = nouveauNoeud;
+
+			precedentNoeud->prochaineDonnee_ = nouveauNoeud;
+			taille_++;
+
+				return Iterateur<T>(nouveauNoeud);
+
+			
+		}
 	}
 
 	// Enlève l'élément à la position it et retourne un itérateur vers le suivant.
@@ -67,6 +121,29 @@ public:
 		//  donc en 2. il se peut qu'il n'y ait pas de précédent et alors c'est
 		//  la tête de liste qu'il faut ajuster.
 		//NOTE: On ne demande pas de supporter d'effacer le dernier élément (c'est similaire au cas pour enlever le premier).
+
+		Noeud<T>* noeudAEffacer = it.position_;
+		Noeud<T>* prochainNoeud = noeudAEffacer->prochaineDonnee_;
+		Noeud<T>* precedentNoeud = noeudAEffacer->precedenteDonnee_;
+ 
+
+		if (precedentNoeud == nullptr)
+		{
+			tete_ = prochainNoeud;
+		}
+
+		else
+		{
+			precedentNoeud->prochaineDonnee_ = prochainNoeud;
+		}
+
+		prochainNoeud->precedenteDonnee_ = precedentNoeud;
+
+		delete noeudAEffacer;
+		taille_--;
+
+		return Iterateur<T>(prochainNoeud);
+
 	}
 
 private:
